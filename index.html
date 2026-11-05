@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Meta: paper description and keywords -->
+  <meta name="description"
+        content="Machine learning models predicting early pulmonary hypertension in very preterm infants from routine NICU data collected in the first 72 hours of life.">
+  <meta name="keywords" content="Early pulmonary hypertension, Machine learning, Very preterm infant, Prediction model, SHAP analysis, Neonatology">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Paper title -->
+  <title>Machine Learning-Based Prediction of Early Pulmonary Hypertension in Very Preterm Infants</title>
+
+  <!-- Noto Sans is self-hosted, so the page has no external dependencies. -->
+  <link rel="stylesheet" href="./static/css/fonts.css">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <!-- Icons are rendered as inline SVG by fontawesome.all.min.js below. The matching
+       stylesheet is only needed alongside a static/webfonts/ directory. -->
+  <!-- academicons supplies the "ai ai-arxiv" icon; add its stylesheet back with an arXiv button. -->
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.ico">
+
+  <script src="./static/js/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <a class="navbar-item" href="https://aidas.snu.ac.kr">
+        <span class="icon">
+            <i class="fas fa-home"></i>
+        </span>
+        <div style="padding-left:5px;">AIDAS Lab</div>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <!-- Paper Title -->
+          <h1 class="title is-1 publication-title">Machine Learning-Based Prediction Model for Early Pulmonary Hypertension in Very Preterm Infants</h1>
+
+          <!-- Conference Name and Year. Full name is spelled out in the BibTeX block. -->
+          <h1 class="title is-4 publication-title" style="color: #FF0066;">
+            ASPR 2026
+          </h1>
+
+          <!-- Authors and Affiliations -->
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Baek Sup Shin<sup>1,2</sup>,</span>
+            <span class="author-block">Ju Sun Heo<sup>1,2</sup>,</span>
+            <span class="author-block"><a href="mailto:finde159@snu.ac.kr">Yongha Lee</a><sup>3</sup>,</span>
+            <span class="author-block"><a href="mailto:steve97@snu.ac.kr">Sunghwan Steve Cho</a><sup>4</sup>,</span>
+            <span class="author-block">Seh Hyun Kim<sup>1,2</sup>,</span>
+            <span class="author-block">Seung Han Shin<sup>1,2</sup>,</span>
+            <span class="author-block">Ee-Kyung Kim<sup>1,2</sup>,</span>
+            <span class="author-block"><a href="mailto:jaeyoung.do@snu.ac.kr">Jaeyoung Do</a><sup>3,4</sup>,</span>
+            <span class="author-block">Han-Suk Kim<sup>3,4,*</sup></span>
+          </div>
+
+          <div class="is-size-6 publication-authors" style="margin-top: 10px;">
+            <span class="author-block"><sup>1</sup>Division of Neonatology, Department of Pediatrics, Seoul National University Children&rsquo;s Hospital, Korea</span>
+            <span class="author-block"><sup>2</sup>Department of Pediatrics, Seoul National University College of Medicine, Korea</span>
+            <span class="author-block"><sup>3</sup>Interdisciplinary Program in Artificial Intelligence, Seoul National University, Korea</span>
+            <span class="author-block"><sup>4</sup>Department of Electrical and Computer Engineering, Seoul National University, Korea</span>
+          </div>
+          <div class="is-size-6 publication-authors" style="margin-top: 6px;">
+            <span class="author-block"><sup>*</sup>Corresponding author</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- BibTeX Link. -->
+              <span class="link-block">
+                <a href="#BibTeX"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-quote-left"></i>
+                  </span>
+                  <span>BibTeX</span>
+                </a>
+              </span>
+              <!-- Contact Link. -->
+              <span class="link-block">
+                <a href="mailto:finde159@snu.ac.kr,steve97@snu.ac.kr,jaeyoung.do@snu.ac.kr"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-envelope"></i>
+                  </span>
+                  <span>Contact</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Teaser -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <!-- main image -->
+      <figure class="image">
+        <img src="./static/images/roc-curves.png"
+             alt="Receiver operating characteristic curves for all nine model configurations on the held-out test set, with XGBoost highest at AUC 0.953 and ElasticNet lowest at 0.905."
+             style="max-width: 760px; margin: 0 auto; display: block;">
+      </figure>
+      <h2 class="subtitle has-text-centered" style="margin-top: 20px;">
+        All nine model configurations exceeded <b>AUROC 0.90</b> on the held-out test set,
+        with XGBoost highest at <b>0.9527</b>. Curves are numbered 1&ndash;7 by model family;
+        4a/4b and 6a/6b are the simple- and KNN-imputation variants of ElasticNet and SVM.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<!-- Paper abstract -->
+<section class="hero is-light ">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-full-width">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="column has-text-justified" style="padding: 0;">
+            <p>
+              Early pulmonary hypertension affects up to <b>30&ndash;55%</b> of infants born before 28 weeks and contributes
+              to bronchopulmonary dysplasia, right heart failure, and death. It is difficult to catch in time:
+              echocardiography is intermittent and operator-dependent, evidence for biomarker-based
+              screening is limited, and risk factors have largely been studied one at a time.
+            </p>
+            <p>
+              We trained seven machine-learning model families on <b>57 routinely collected variables</b> from the first
+              72 hours of life, in a cohort of <b>1,016 very preterm infants</b> of whom 59 (5.8%) developed Early PH.
+              All models exceeded AUROC 0.90; XGBoost reached <b>AUROC 0.9527</b>, identifying three of every four cases
+              in the held-out test set while flagging 2.6% of unaffected infants. SHAP analysis attributed the
+              largest contributions to markers of early hemodynamic instability and of oxygen and ventilatory
+              requirement.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Methods -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Methods</h2>
+        <div class="content has-text-justified">
+          <p>
+            We reviewed <b>1,259</b> very preterm or very-low-birth-weight infants admitted to the Seoul National
+            University Children&rsquo;s Hospital NICU between 2013 and 2025. Early PH was defined as echocardiographically
+            confirmed pulmonary hypertension with treatment started on postnatal days 4&ndash;28. After exclusions,
+            <b>1,016 inborn infants</b> remained, <b>59 of them with Early PH &mdash; 5.8%</b>. That imbalance is why the
+            results below report precision and PR-AUC alongside AUROC.
+          </p>
+          <p>
+            The model uses <b>57 variables, every one of them closing at 72 hours of life</b>. Postnatal day 4 begins
+            at 72 hours, so the predictor window ends exactly where the outcome window starts: no feature is measured
+            after an infant could first meet the Early PH definition. All 57 are recorded in routine care, so the model
+            needs no measurement that is not already being taken.
+          </p>
+        </div>
+
+        <!-- Diagram: cohort selection -->
+        <figure class="image" style="margin: 40px auto 0 auto;">
+          <svg viewBox="0 0 880 460" role="img" aria-label="Cohort selection flow diagram: 1,259 infants screened, 243 excluded, 1,016 eligible, split into 59 Early PH-positive and 957 Early PH-negative, then a stratified 80:20 train-test split.">
+                    <defs>
+                      <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" class="d-arrow"/>
+                      </marker>
+                    </defs>
+                    <g style="color: var(--text-faint)">
+          
+                    <!-- screened -->
+                    <rect class="d-box" x="40" y="16" width="480" height="72" rx="8"/>
+                    <text class="d-t-b" x="60" y="46">1,259 very preterm / VLBW infants screened</text>
+                    <text class="d-t-s" x="60" y="68">GA &lt; 32 weeks or BW &lt; 1,500 g &#183; SNUCH NICU, 2013&ndash;2025</text>
+          
+                    <!-- trunk to eligible -->
+                    <path class="d-line" d="M280,88 V140" marker-end="url(#ah)"/>
+                    <!-- branch to exclusions -->
+                    <path class="d-line" d="M280,112 H552" marker-end="url(#ah)"/>
+          
+                    <!-- exclusions -->
+                    <rect class="d-box-x" x="560" y="58" width="310" height="122" rx="8"/>
+                    <text class="d-t-b" x="580" y="84">Excluded (n = 243)</text>
+                    <text class="d-t-s" x="580" y="106">&#8226; Died within 3 days of birth</text>
+                    <text class="d-t-s" x="580" y="125">&#8226; Outborn</text>
+                    <text class="d-t-s" x="580" y="144">&#8226; Complex intracardiac defects</text>
+                    <text class="d-t-s" x="580" y="163">&#8226; PH treatment without echo evidence</text>
+          
+                    <!-- eligible -->
+                    <rect class="d-box-b" x="40" y="146" width="480" height="56" rx="8"/>
+                    <text class="d-t-brand" x="60" y="180">1,016 inborn infants eligible for analysis</text>
+          
+                    <!-- split -->
+                    <path class="d-line" d="M280,202 V232"/>
+                    <path class="d-line" d="M160,232 H405"/>
+                    <path class="d-line" d="M160,232 V262" marker-end="url(#ah)"/>
+                    <path class="d-line" d="M405,232 V262" marker-end="url(#ah)"/>
+          
+                    <rect class="d-box" x="40" y="268" width="240" height="68" rx="8"/>
+                    <text class="d-t-b" x="58" y="298">59 &#183; Early PH&#8209;positive</text>
+                    <text class="d-t-s" x="58" y="320">5.8% of the cohort</text>
+          
+                    <rect class="d-box" x="290" y="268" width="230" height="68" rx="8"/>
+                    <text class="d-t-b" x="308" y="298">957 &#183; Early PH&#8209;negative</text>
+                    <text class="d-t-s" x="308" y="320">94.2% of the cohort</text>
+          
+                    <!-- to modeling -->
+                    <path class="d-line" d="M160,336 V360"/>
+                    <path class="d-line" d="M405,336 V360"/>
+                    <path class="d-line" d="M160,360 H405"/>
+                    <path class="d-line" d="M280,360 V386" marker-end="url(#ah)"/>
+          
+                    <rect class="d-box" x="40" y="392" width="480" height="56" rx="8"/>
+                    <text class="d-t-b" x="60" y="418">Stratified 80 : 20 train / test split</text>
+                    <text class="d-t-s" x="60" y="438">57 features from the first 72 h &#183; 7 machine-learning models</text>
+          
+                    </g>
+                  </svg>
+        </figure>
+        <h3 class="has-text-centered" style="margin-top: 20px;">
+          Cohort selection. Early PH was defined as echocardiographically confirmed pulmonary hypertension
+          with treatment initiated on postnatal days 4&ndash;28.
+        </h3>
+
+        <figure class="image" style="margin: 45px auto 0 auto;">
+          <svg viewBox="0 0 880 200" role="img" aria-label="Timeline. The predictor window runs from birth to 72 hours of life. The outcome window opens at exactly that point, since postnatal day 4 begins at 72 hours, and runs to day 28. The two windows meet at 72 hours; the prediction is made there.">
+          <rect class="d-fill-brand" x="70" y="44" width="230" height="58" rx="7"/>
+          <text class="d-t-brand" x="185" y="70" text-anchor="middle">Predictor window</text>
+          <text class="d-t-s" x="185" y="90" text-anchor="middle">birth &ndash; 72 h &#183; 57 features</text>
+
+          <rect class="d-fill-accent" x="300" y="44" width="520" height="58" rx="7"/>
+          <text class="d-t-b" x="560" y="70" text-anchor="middle">Outcome window</text>
+          <text class="d-t-s" x="560" y="90" text-anchor="middle">Early PH: echo-confirmed PH with treatment started, postnatal days 4&ndash;28</text>
+
+          <!-- the two windows meet exactly at 72 h -->
+          <path class="d-line" style="stroke-dasharray:4 3" d="M300,32 V150"/>
+          <circle cx="300" cy="32" r="3.5" class="d-arrow"/>
+          <text class="d-t-s" x="300" y="24" text-anchor="middle">prediction made here</text>
+
+          <!-- axis -->
+          <path class="d-line" d="M70,128 H820"/>
+          <path class="d-line" d="M70,122 V134"/>
+          <path class="d-line" d="M300,122 V134"/>
+          <path class="d-line" d="M820,122 V134"/>
+
+          <text class="d-t-s" x="70" y="168" text-anchor="start">Birth (0 h)</text>
+          <text class="d-t-s" x="300" y="168" text-anchor="middle">72 h = start of day 4</text>
+          <text class="d-t-s" x="820" y="168" text-anchor="end">Day 28</text>
+
+          <text class="d-t-s" x="70" y="192">Postnatal day 4 begins at 72 h of life, so the two windows meet rather than overlap. Axis not to scale.</text>
+          </svg>
+        </figure>
+        <h3 class="has-text-centered" style="margin-top: 20px;">
+          Prediction and outcome windows. Postnatal day 4 begins at 72 hours of life, so every predictor is
+          measured before an infant could first meet the Early PH definition.
+        </h3>
+
+        <h3 class="title is-5" style="margin-top: 45px;">Five families of variables</h3>
+        <div class="columns is-multiline" style="margin-top: 6px;">
+          <div class="column is-one-fifth"><div class="feat-card"><h4>Maternal</h4><p>Antenatal and delivery characteristics.</p></div></div>
+          <div class="column is-one-fifth"><div class="feat-card"><h4>Neonatal</h4><p>Gestational age, birth weight, Apgar scores, early morbidities.</p></div></div>
+          <div class="column is-one-fifth"><div class="feat-card"><h4>Ventilator</h4><p>Modes, settings, and cumulative ventilatory burden.</p></div></div>
+          <div class="column is-one-fifth"><div class="feat-card"><h4>Vital signs</h4><p>Monitoring summaries such as time with SpO<sub>2</sub> &lt; 90%.</p></div></div>
+          <div class="column is-one-fifth"><div class="feat-card"><h4>Biomarkers</h4><p>Laboratory values from the first 72 hours.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Results -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Results</h2>
+        <div class="content has-text-justified">
+          <p>
+            Seven model families &mdash; nine configurations, counting the imputation variants &mdash; were trained on the
+            same features and the same stratified 80:20 split. <b>All exceeded AUROC 0.90.</b> XGBoost was the strongest
+            at <b>0.9527</b>, identifying three of every four Early PH cases (recall 0.750) while flagging 2.6% of
+            unaffected infants (specificity 0.974).
+          </p>
+          <p>
+            The models differ far more in where their operating points sit than in AUROC. Random Forest almost never
+            flags a healthy infant but finds only one case in six; ElasticNet and SVM catch nearly every case at the
+            cost of many false alarms. XGBoost has the most balanced operating point of the nine. These are the
+            thresholds used in the study, not thresholds tuned for deployment.
+          </p>
+
+        <div class="radar-block">
+          <input class="rd-in" type="radio" name="rd" id="rd-all" checked>
+          <input class="rd-in" type="radio" name="rd" id="rd-0">
+          <input class="rd-in" type="radio" name="rd" id="rd-1">
+          <input class="rd-in" type="radio" name="rd" id="rd-2">
+          <input class="rd-in" type="radio" name="rd" id="rd-3">
+          <input class="rd-in" type="radio" name="rd" id="rd-4">
+          <input class="rd-in" type="radio" name="rd" id="rd-5">
+          <input class="rd-in" type="radio" name="rd" id="rd-6">
+          <input class="rd-in" type="radio" name="rd" id="rd-7">
+          <input class="rd-in" type="radio" name="rd" id="rd-8">
+          <div class="radar-tabs">
+            <label for="rd-all">All models</label>
+            <label for="rd-0" style="--c:#1f77b4">Random Forest</label>
+            <label for="rd-1" style="--c:#ff7f0e">Weighted RF</label>
+            <label for="rd-2" style="--c:#2ca02c">Balanced RF</label>
+            <label for="rd-3" style="--c:#d62728">ElasticNet <i>simple imp.</i></label>
+            <label for="rd-4" style="--c:#9467bd">ElasticNet <i>KNN imp.</i></label>
+            <label for="rd-5" style="--c:#8c564b">LightGBM</label>
+            <label for="rd-6" style="--c:#e377c2">SVM <i>simple imp.</i></label>
+            <label for="rd-7" style="--c:#7f7f7f">SVM <i>KNN imp.</i></label>
+            <label for="rd-8" style="--c:#9a9c14">XGBoost</label>
+          </div>
+          <div class="radar-wrap">
+          <svg viewBox="0 0 880 600" role="img" aria-label="Radar chart of seven performance metrics for nine model configurations. Every model sits near the outer ring on AUROC, specificity and accuracy, and spreads widely on recall, precision and F1.">
+            <polygon class="rd-ring" points="445.0,248.8 485.1,268.0 495.0,311.4 467.2,346.2 422.8,346.2 395.0,311.4 404.9,268.0"/>
+            <text class="rd-scale" x="450" y="252.8">0.25</text>
+            <polygon class="rd-ring" points="445.0,197.5 525.1,236.1 544.9,322.8 489.5,392.3 400.5,392.3 345.1,322.8 364.9,236.1"/>
+            <text class="rd-scale" x="450" y="201.5">0.50</text>
+            <polygon class="rd-ring" points="445.0,146.2 565.2,204.1 594.9,334.2 511.7,438.5 378.3,438.5 295.1,334.2 324.8,204.1"/>
+            <text class="rd-scale" x="450" y="150.2">0.75</text>
+            <polygon class="rd-ring" points="445.0,95.0 605.3,172.2 644.9,345.6 533.9,484.7 356.1,484.7 245.1,345.6 284.7,172.2"/>
+            <text class="rd-scale" x="450" y="99.0">1.00</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="445.0" y2="95.0"/>
+            <text class="rd-axis" x="445.0" y="69.3" text-anchor="middle">AUROC</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="605.3" y2="172.2"/>
+            <text class="rd-axis" x="628.5" y="157.7" text-anchor="start">PR-AUC</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="644.9" y2="345.6"/>
+            <text class="rd-axis" x="673.8" y="356.2" text-anchor="start">F1</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="533.9" y2="484.7"/>
+            <text class="rd-axis" x="546.8" y="515.5" text-anchor="start">Recall</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="356.1" y2="484.7"/>
+            <text class="rd-axis" x="343.2" y="515.5" text-anchor="end">Precision</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="245.1" y2="345.6"/>
+            <text class="rd-axis" x="216.2" y="356.2" text-anchor="end">Specificity</text>
+            <line class="rd-spoke" x1="445" y1="300" x2="284.7" y2="172.2"/>
+            <text class="rd-axis" x="261.5" y="157.7" text-anchor="end">Accuracy</text>
+            <polygon class="rd-s rd-s0" style="--c:#1f77b4" points="445.0,105.0 542.4,222.3 502.1,313.0 459.8,330.8 356.1,484.7 245.1,345.6 292.6,178.4"/>
+            <polygon class="rd-s rd-s1" style="--c:#ff7f0e" points="445.0,108.1 533.1,229.7 539.1,321.5 474.6,361.6 373.8,447.8 246.2,345.4 291.8,177.8"/>
+            <polygon class="rd-s rd-s2" style="--c:#2ca02c" points="445.0,105.5 550.2,216.1 531.9,319.8 519.1,453.9 418.8,354.3 270.1,339.9 305.2,188.5"/>
+            <polygon class="rd-s rd-s3" style="--c:#d62728" points="445.0,114.3 552.5,214.3 547.2,323.3 526.5,469.3 413.4,365.6 266.0,340.9 301.2,185.3"/>
+            <polygon class="rd-s rd-s4" style="--c:#9467bd" points="445.0,114.5 551.6,215.0 547.2,323.3 526.5,469.3 413.4,365.6 266.0,340.9 301.2,185.3"/>
+            <polygon class="rd-s rd-s5" style="--c:#8c564b" points="445.0,108.0 548.1,217.8 563.4,327.0 504.3,423.1 397.6,398.4 252.4,344.0 293.4,179.1"/>
+            <polygon class="rd-s rd-s6" style="--c:#e377c2" points="445.0,107.6 546.3,219.2 528.0,318.9 526.5,469.3 421.2,349.5 276.4,338.5 309.1,191.6"/>
+            <polygon class="rd-s rd-s7" style="--c:#7f7f7f" points="445.0,107.8 546.3,219.2 528.0,318.9 526.5,469.3 421.2,349.5 276.4,338.5 309.1,191.6"/>
+            <polygon class="rd-s rd-s8" style="--c:#9a9c14" points="445.0,104.7 550.9,215.6 583.4,331.6 511.7,438.5 387.8,418.8 250.3,344.4 291.0,177.2"/>
+            <g class="rd-d rd-d0" style="--c:#1f77b4"><circle cx="445.0" cy="105.0" r="3.2"/><circle cx="542.4" cy="222.3" r="3.2"/><circle cx="502.1" cy="313.0" r="3.2"/><circle cx="459.8" cy="330.8" r="3.2"/><circle cx="356.1" cy="484.7" r="3.2"/><circle cx="245.1" cy="345.6" r="3.2"/><circle cx="292.6" cy="178.4" r="3.2"/></g>
+            <g class="rd-d rd-d1" style="--c:#ff7f0e"><circle cx="445.0" cy="108.1" r="3.2"/><circle cx="533.1" cy="229.7" r="3.2"/><circle cx="539.1" cy="321.5" r="3.2"/><circle cx="474.6" cy="361.6" r="3.2"/><circle cx="373.8" cy="447.8" r="3.2"/><circle cx="246.2" cy="345.4" r="3.2"/><circle cx="291.8" cy="177.8" r="3.2"/></g>
+            <g class="rd-d rd-d2" style="--c:#2ca02c"><circle cx="445.0" cy="105.5" r="3.2"/><circle cx="550.2" cy="216.1" r="3.2"/><circle cx="531.9" cy="319.8" r="3.2"/><circle cx="519.1" cy="453.9" r="3.2"/><circle cx="418.8" cy="354.3" r="3.2"/><circle cx="270.1" cy="339.9" r="3.2"/><circle cx="305.2" cy="188.5" r="3.2"/></g>
+            <g class="rd-d rd-d3" style="--c:#d62728"><circle cx="445.0" cy="114.3" r="3.2"/><circle cx="552.5" cy="214.3" r="3.2"/><circle cx="547.2" cy="323.3" r="3.2"/><circle cx="526.5" cy="469.3" r="3.2"/><circle cx="413.4" cy="365.6" r="3.2"/><circle cx="266.0" cy="340.9" r="3.2"/><circle cx="301.2" cy="185.3" r="3.2"/></g>
+            <g class="rd-d rd-d4" style="--c:#9467bd"><circle cx="445.0" cy="114.5" r="3.2"/><circle cx="551.6" cy="215.0" r="3.2"/><circle cx="547.2" cy="323.3" r="3.2"/><circle cx="526.5" cy="469.3" r="3.2"/><circle cx="413.4" cy="365.6" r="3.2"/><circle cx="266.0" cy="340.9" r="3.2"/><circle cx="301.2" cy="185.3" r="3.2"/></g>
+            <g class="rd-d rd-d5" style="--c:#8c564b"><circle cx="445.0" cy="108.0" r="3.2"/><circle cx="548.1" cy="217.8" r="3.2"/><circle cx="563.4" cy="327.0" r="3.2"/><circle cx="504.3" cy="423.1" r="3.2"/><circle cx="397.6" cy="398.4" r="3.2"/><circle cx="252.4" cy="344.0" r="3.2"/><circle cx="293.4" cy="179.1" r="3.2"/></g>
+            <g class="rd-d rd-d6" style="--c:#e377c2"><circle cx="445.0" cy="107.6" r="3.2"/><circle cx="546.3" cy="219.2" r="3.2"/><circle cx="528.0" cy="318.9" r="3.2"/><circle cx="526.5" cy="469.3" r="3.2"/><circle cx="421.2" cy="349.5" r="3.2"/><circle cx="276.4" cy="338.5" r="3.2"/><circle cx="309.1" cy="191.6" r="3.2"/></g>
+            <g class="rd-d rd-d7" style="--c:#7f7f7f"><circle cx="445.0" cy="107.8" r="3.2"/><circle cx="546.3" cy="219.2" r="3.2"/><circle cx="528.0" cy="318.9" r="3.2"/><circle cx="526.5" cy="469.3" r="3.2"/><circle cx="421.2" cy="349.5" r="3.2"/><circle cx="276.4" cy="338.5" r="3.2"/><circle cx="309.1" cy="191.6" r="3.2"/></g>
+            <g class="rd-d rd-d8" style="--c:#9a9c14"><circle cx="445.0" cy="104.7" r="3.2"/><circle cx="550.9" cy="215.6" r="3.2"/><circle cx="583.4" cy="331.6" r="3.2"/><circle cx="511.7" cy="438.5" r="3.2"/><circle cx="387.8" cy="418.8" r="3.2"/><circle cx="250.3" cy="344.4" r="3.2"/><circle cx="291.0" cy="177.2" r="3.2"/></g>
+          </svg>
+          </div>
+          <div class="radar-readout">
+            <p class="rd-r rd-rall">Nine configurations across seven metrics, each axis running 0 at the center to 1 at the rim. Select a model to isolate it. Compare axis by axis rather than by area &mdash; the enclosed shape depends on the order the axes happen to be in.</p>
+            <p class="rd-r rd-r0"><b>Random Forest</b><br>AUROC 0.9510 &middot; PR-AUC 0.6079 &middot; F1 0.2857 &middot; Recall 0.167 &middot; Precision 1.000 &middot; Specificity 1.0000 &middot; Accuracy 0.9510</p>
+            <p class="rd-r rd-r1"><b>Weighted RF</b><br>AUROC 0.9362 &middot; PR-AUC 0.5498 &middot; F1 0.4706 &middot; Recall 0.333 &middot; Precision 0.800 &middot; Specificity 0.9948 &middot; Accuracy 0.9559</p>
+            <p class="rd-r rd-r2"><b>Balanced RF</b><br>AUROC 0.9486 &middot; PR-AUC 0.6565 &middot; F1 0.4348 &middot; Recall 0.833 &middot; Precision 0.294 &middot; Specificity 0.8750 &middot; Accuracy 0.8725</p>
+            <p class="rd-r rd-r3"><b>ElasticNet (simple imp.)</b><br>AUROC 0.9060 &middot; PR-AUC 0.6707 &middot; F1 0.5116 &middot; Recall 0.917 &middot; Precision 0.355 &middot; Specificity 0.8958 &middot; Accuracy 0.8971</p>
+            <p class="rd-r rd-r4"><b>ElasticNet (KNN imp.)</b><br>AUROC 0.9047 &middot; PR-AUC 0.6652 &middot; F1 0.5116 &middot; Recall 0.917 &middot; Precision 0.355 &middot; Specificity 0.8958 &middot; Accuracy 0.8971</p>
+            <p class="rd-r rd-r5"><b>LightGBM</b><br>AUROC 0.9366 &middot; PR-AUC 0.6431 &middot; F1 0.5926 &middot; Recall 0.667 &middot; Precision 0.533 &middot; Specificity 0.9635 &middot; Accuracy 0.9461</p>
+            <p class="rd-r rd-r6"><b>SVM (simple imp.)</b><br>AUROC 0.9384 &middot; PR-AUC 0.6321 &middot; F1 0.4151 &middot; Recall 0.917 &middot; Precision 0.268 &middot; Specificity 0.8438 &middot; Accuracy 0.8480</p>
+            <p class="rd-r rd-r7"><b>SVM (KNN imp.)</b><br>AUROC 0.9375 &middot; PR-AUC 0.6318 &middot; F1 0.4151 &middot; Recall 0.917 &middot; Precision 0.268 &middot; Specificity 0.8438 &middot; Accuracy 0.8480</p>
+            <p class="rd-r rd-r8"><b>XGBoost</b><br>AUROC 0.9527 &middot; PR-AUC 0.6606 &middot; F1 0.6923 &middot; Recall 0.750 &middot; Precision 0.643 &middot; Specificity 0.9740 &middot; Accuracy 0.9608</p>
+          </div>
+        </div>
+
+          <details class="numbers">
+            <summary>All numbers</summary>
+            <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+              <thead>
+                <tr>
+                <th>Model</th>
+                <th>AUROC</th>
+                <th>PR-AUC</th>
+                <th>F1</th>
+                <th>Recall</th>
+                <th>Precision<sup>*</sup></th>
+                <th>Specificity</th>
+                <th>Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                <th>Random Forest</th>
+                <td>0.9510</td>
+                <td>0.6079</td>
+                <td>0.2857</td>
+                <td>0.167</td>
+                <td>1.000</td>
+                <td>1.0000</td>
+                <td>0.9510</td>
+                </tr>
+                <tr>
+                <th>Weighted RF</th>
+                <td>0.9362</td>
+                <td>0.5498</td>
+                <td>0.4706</td>
+                <td>0.333</td>
+                <td>0.800</td>
+                <td>0.9948</td>
+                <td>0.9559</td>
+                </tr>
+                <tr>
+                <th>Balanced RF</th>
+                <td>0.9486</td>
+                <td>0.6565</td>
+                <td>0.4348</td>
+                <td>0.833</td>
+                <td>0.294</td>
+                <td>0.8750</td>
+                <td>0.8725</td>
+                </tr>
+                <tr>
+                <th>ElasticNet <span class="model-variant">simple imp.</span></th>
+                <td>0.9060</td>
+                <td>0.6707</td>
+                <td>0.5116</td>
+                <td>0.917</td>
+                <td>0.355</td>
+                <td>0.8958</td>
+                <td>0.8971</td>
+                </tr>
+                <tr>
+                <th>ElasticNet <span class="model-variant">KNN imp.</span></th>
+                <td>0.9047</td>
+                <td>0.6652</td>
+                <td>0.5116</td>
+                <td>0.917</td>
+                <td>0.355</td>
+                <td>0.8958</td>
+                <td>0.8971</td>
+                </tr>
+                <tr>
+                <th>LightGBM</th>
+                <td>0.9366</td>
+                <td>0.6431</td>
+                <td>0.5926</td>
+                <td>0.667</td>
+                <td>0.533</td>
+                <td>0.9635</td>
+                <td>0.9461</td>
+                </tr>
+                <tr>
+                <th>SVM <span class="model-variant">simple imp.</span></th>
+                <td>0.9384</td>
+                <td>0.6321</td>
+                <td>0.4151</td>
+                <td>0.917</td>
+                <td>0.268</td>
+                <td>0.8438</td>
+                <td>0.8480</td>
+                </tr>
+                <tr>
+                <th>SVM <span class="model-variant">KNN imp.</span></th>
+                <td>0.9375</td>
+                <td>0.6318</td>
+                <td>0.4151</td>
+                <td>0.917</td>
+                <td>0.268</td>
+                <td>0.8438</td>
+                <td>0.8480</td>
+                </tr>
+                <tr class="has-background-light">
+                <th>XGBoost</th>
+                <td><strong>0.9527</strong></td>
+                <td><strong>0.6606</strong></td>
+                <td><strong>0.6923</strong></td>
+                <td><strong>0.750</strong></td>
+                <td><strong>0.643</strong></td>
+                <td><strong>0.9740</strong></td>
+                <td><strong>0.9608</strong></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                <td colspan="8" class="has-text-grey is-size-7 has-text-left">
+                  Held-out test set, at the operating threshold used in the study. Higher is better throughout.
+                  <sup>*</sup> Precision is derived from F1 and recall; each value is consistent with the reported
+                  specificity and accuracy.
+                </td>
+                </tr>
+              </tfoot>
+            </table>
+          </details>
+
+          <div class="notification is-light" style="margin-top: 10px;">
+            <p style="margin:0;">
+              <b>Why PR-AUC matters here.</b> AUROC was the study&rsquo;s primary metric, but Early PH occurred in only
+              5.8% of the cohort. At that prevalence a random classifier scores a PR-AUC of about 0.058, so the observed
+              0.55&ndash;0.67 is the figure that shows what the models add under the imbalance they will actually meet.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Analysis -->
+<section class="section" style="padding-top: 0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Analysis</h2>
+        <div class="content has-text-justified">
+          <p>
+            SHAP attributes each prediction to individual features, which allows the model&rsquo;s inputs to be compared
+            against what is already known about neonatal physiology. Four directions were consistent:
+          </p>
+          <ul>
+            <li><b>Hypotension</b> increased predicted Early PH probability.</li>
+            <li><b>Hydrocortisone treatment for hypotension</b> increased it.</li>
+            <li><b>A higher SpO<sub>2</sub>/FiO<sub>2</sub> ratio</b> lowered it &mdash; poorer oxygenation efficiency pushed predictions up.</li>
+            <li><b>Greater ventilatory burden</b> increased it.</li>
+          </ul>
+          <p>
+            Together these point to infants with poor early hemodynamic stability and a high oxygen and ventilatory
+            requirement, which is consistent with what is known about the condition. Several of the strongest
+            contributors &mdash; hydrocortisone, PDA treatment, escalating support &mdash; are interventions given
+            <em>because</em> an infant is unstable, so the model may be reflecting illness severity and its management
+            as much as pulmonary hypertension specifically. These are associations within the model, not causes.
+          </p>
+        </div>
+
+        <figure class="image" style="margin: 40px auto 0 auto;">
+          <svg viewBox="0 0 880 659" role="img" aria-label="Ridge plot of SHAP value distributions for the twenty most influential features. Hypotension, hydrocortisone for hypotension and mean SpO2/FiO2 ratio show the widest spread; color runs from blue at low feature values to red at high ones.">
+                    <defs><linearGradient id="sg0" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#41a8fb"/><stop offset="9.1%" stop-color="#53b0fc"/><stop offset="18.2%" stop-color="#0c90fb"/><stop offset="27.3%" stop-color="#1996fb"/><stop offset="36.4%" stop-color="#68bafc"/><stop offset="45.5%" stop-color="#b7defe"/><stop offset="54.5%" stop-color="#b7defe"/><stop offset="63.6%" stop-color="#b7defe"/><stop offset="72.7%" stop-color="#ff3b79"/><stop offset="81.8%" stop-color="#ff2369"/><stop offset="90.9%" stop-color="#ff1962"/><stop offset="100.0%" stop-color="#ff3d7a"/><stop offset="100%" stop-color="#ff3d7a"/></linearGradient><linearGradient id="sg1" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#4eaefc"/><stop offset="9.1%" stop-color="#4eaefc"/><stop offset="18.2%" stop-color="#2a9efc"/><stop offset="27.3%" stop-color="#2ea0fc"/><stop offset="36.4%" stop-color="#1e98fb"/><stop offset="45.5%" stop-color="#1896fb"/><stop offset="54.5%" stop-color="#2ea0fc"/><stop offset="63.6%" stop-color="#50affc"/><stop offset="72.7%" stop-color="#50affc"/><stop offset="81.8%" stop-color="#ff3474"/><stop offset="90.9%" stop-color="#ff3374"/><stop offset="100.0%" stop-color="#ff417d"/><stop offset="100%" stop-color="#ff417d"/></linearGradient><linearGradient id="sg2" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fc5697"/><stop offset="9.1%" stop-color="#fd3881"/><stop offset="18.2%" stop-color="#fc3280"/><stop offset="27.3%" stop-color="#fe186b"/><stop offset="36.4%" stop-color="#fc146a"/><stop offset="45.5%" stop-color="#fd2c79"/><stop offset="54.5%" stop-color="#fc3481"/><stop offset="63.6%" stop-color="#fc3481"/><stop offset="72.7%" stop-color="#ec74be"/><stop offset="81.8%" stop-color="#d32495"/><stop offset="90.9%" stop-color="#be23a6"/><stop offset="100.0%" stop-color="#d94eb7"/><stop offset="100%" stop-color="#d94eb7"/></linearGradient><linearGradient id="sg3" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#39a5fc"/><stop offset="9.1%" stop-color="#299efc"/><stop offset="18.2%" stop-color="#3ca6fc"/><stop offset="27.3%" stop-color="#3ca6fc"/><stop offset="36.4%" stop-color="#3ca6fc"/><stop offset="45.5%" stop-color="#3ca6fc"/><stop offset="54.5%" stop-color="#3ca6fc"/><stop offset="63.6%" stop-color="#3ca6fc"/><stop offset="72.7%" stop-color="#3ca6fc"/><stop offset="81.8%" stop-color="#3ca6fc"/><stop offset="90.9%" stop-color="#ff3b7a"/><stop offset="100.0%" stop-color="#ff3978"/><stop offset="100%" stop-color="#ff3978"/></linearGradient><linearGradient id="sg4" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#3fa8fc"/><stop offset="9.1%" stop-color="#506ade"/><stop offset="18.2%" stop-color="#4c65e0"/><stop offset="27.3%" stop-color="#e21b92"/><stop offset="36.4%" stop-color="#e5168e"/><stop offset="45.5%" stop-color="#ea3298"/><stop offset="54.5%" stop-color="#f3459b"/><stop offset="63.6%" stop-color="#ff256a"/><stop offset="72.7%" stop-color="#f83b89"/><stop offset="81.8%" stop-color="#fe588d"/><stop offset="90.9%" stop-color="#f85ea3"/><stop offset="100.0%" stop-color="#fb63a0"/><stop offset="100%" stop-color="#fb63a0"/></linearGradient><linearGradient id="sg5" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#71bdfa"/><stop offset="9.1%" stop-color="#6791ea"/><stop offset="18.2%" stop-color="#8662d0"/><stop offset="27.3%" stop-color="#4766e1"/><stop offset="36.4%" stop-color="#6e55d1"/><stop offset="45.5%" stop-color="#b439b4"/><stop offset="54.5%" stop-color="#e01c95"/><stop offset="63.6%" stop-color="#db2099"/><stop offset="72.7%" stop-color="#f0147e"/><stop offset="81.8%" stop-color="#fb1a6f"/><stop offset="90.9%" stop-color="#ff1761"/><stop offset="100.0%" stop-color="#ff6897"/><stop offset="100%" stop-color="#ff6897"/></linearGradient><linearGradient id="sg6" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fe4d85"/><stop offset="9.1%" stop-color="#ff5389"/><stop offset="18.2%" stop-color="#fe5c8f"/><stop offset="27.3%" stop-color="#fe5c8f"/><stop offset="36.4%" stop-color="#fe5c8f"/><stop offset="45.5%" stop-color="#cb3d6f"/><stop offset="54.5%" stop-color="#ab4194"/><stop offset="63.6%" stop-color="#4078be"/><stop offset="72.7%" stop-color="#6f7ce6"/><stop offset="81.8%" stop-color="#108cf5"/><stop offset="90.9%" stop-color="#1894fb"/><stop offset="100.0%" stop-color="#7bc0fa"/><stop offset="100%" stop-color="#7bc0fa"/></linearGradient><linearGradient id="sg7" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#e69ed4"/><stop offset="9.1%" stop-color="#d538ad"/><stop offset="18.2%" stop-color="#d639ad"/><stop offset="27.3%" stop-color="#7e74d7"/><stop offset="36.4%" stop-color="#e268c0"/><stop offset="45.5%" stop-color="#6855cc"/><stop offset="54.5%" stop-color="#5362d6"/><stop offset="63.6%" stop-color="#de0e8d"/><stop offset="72.7%" stop-color="#e2148a"/><stop offset="81.8%" stop-color="#dd0d8c"/><stop offset="90.9%" stop-color="#f11779"/><stop offset="100.0%" stop-color="#ff739f"/><stop offset="100%" stop-color="#ff739f"/></linearGradient><linearGradient id="sg8" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fe74a0"/><stop offset="9.1%" stop-color="#ff5b8f"/><stop offset="18.2%" stop-color="#71bbfc"/><stop offset="27.3%" stop-color="#71bbfc"/><stop offset="36.4%" stop-color="#82c0fb"/><stop offset="45.5%" stop-color="#2b9bfa"/><stop offset="54.5%" stop-color="#2fa0fb"/><stop offset="63.6%" stop-color="#2f76e8"/><stop offset="72.7%" stop-color="#6165dc"/><stop offset="81.8%" stop-color="#e81c82"/><stop offset="90.9%" stop-color="#eb53aa"/><stop offset="100.0%" stop-color="#d656bc"/><stop offset="100%" stop-color="#d656bc"/></linearGradient><linearGradient id="sg9" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fe5289"/><stop offset="9.1%" stop-color="#ff3d7a"/><stop offset="18.2%" stop-color="#fd4b8f"/><stop offset="27.3%" stop-color="#fc4a8f"/><stop offset="36.4%" stop-color="#fc4a8f"/><stop offset="45.5%" stop-color="#fc4a8f"/><stop offset="54.5%" stop-color="#d62da6"/><stop offset="63.6%" stop-color="#b548b2"/><stop offset="72.7%" stop-color="#de0a88"/><stop offset="81.8%" stop-color="#9a44bf"/><stop offset="90.9%" stop-color="#4679e7"/><stop offset="100.0%" stop-color="#f458a4"/><stop offset="100%" stop-color="#f458a4"/></linearGradient><linearGradient id="sg10" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#c78ad3"/><stop offset="9.1%" stop-color="#9840c2"/><stop offset="18.2%" stop-color="#bc21a8"/><stop offset="27.3%" stop-color="#b020a5"/><stop offset="36.4%" stop-color="#9443bd"/><stop offset="45.5%" stop-color="#555fd9"/><stop offset="54.5%" stop-color="#1883f3"/><stop offset="63.6%" stop-color="#247bee"/><stop offset="72.7%" stop-color="#2c7aef"/><stop offset="81.8%" stop-color="#2773ed"/><stop offset="90.9%" stop-color="#1491fa"/><stop offset="100.0%" stop-color="#70befc"/><stop offset="100%" stop-color="#70befc"/></linearGradient><linearGradient id="sg11" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#ef3e9b"/><stop offset="9.1%" stop-color="#e2128e"/><stop offset="18.2%" stop-color="#d63aac"/><stop offset="27.3%" stop-color="#f41678"/><stop offset="36.4%" stop-color="#e0157c"/><stop offset="45.5%" stop-color="#5980e3"/><stop offset="54.5%" stop-color="#1c86dc"/><stop offset="63.6%" stop-color="#3ca6fc"/><stop offset="72.7%" stop-color="#b9dffe"/><stop offset="81.8%" stop-color="#b9dffe"/><stop offset="90.9%" stop-color="#b9dffe"/><stop offset="100.0%" stop-color="#81c5fd"/><stop offset="100%" stop-color="#81c5fd"/></linearGradient><linearGradient id="sg12" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fe6897"/><stop offset="9.1%" stop-color="#ff3172"/><stop offset="18.2%" stop-color="#f7a7c0"/><stop offset="27.3%" stop-color="#f7a7c0"/><stop offset="36.4%" stop-color="#ff2069"/><stop offset="45.5%" stop-color="#fc1d6d"/><stop offset="54.5%" stop-color="#db2b98"/><stop offset="63.6%" stop-color="#ab2bb3"/><stop offset="72.7%" stop-color="#238df5"/><stop offset="81.8%" stop-color="#59affb"/><stop offset="90.9%" stop-color="#59affb"/><stop offset="100.0%" stop-color="#86c7fd"/><stop offset="100%" stop-color="#86c7fd"/></linearGradient><linearGradient id="sg13" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#8fc4fa"/><stop offset="9.1%" stop-color="#36a0fb"/><stop offset="18.2%" stop-color="#2598fa"/><stop offset="27.3%" stop-color="#2b9bfa"/><stop offset="36.4%" stop-color="#138ef9"/><stop offset="45.5%" stop-color="#0b8efa"/><stop offset="54.5%" stop-color="#665fd5"/><stop offset="63.6%" stop-color="#7952bd"/><stop offset="72.7%" stop-color="#7e55ba"/><stop offset="81.8%" stop-color="#9f50bb"/><stop offset="90.9%" stop-color="#e8609c"/><stop offset="100.0%" stop-color="#feb8ce"/><stop offset="100%" stop-color="#feb8ce"/></linearGradient><linearGradient id="sg14" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#9fd3fd"/><stop offset="9.1%" stop-color="#8c58c9"/><stop offset="18.2%" stop-color="#b01eab"/><stop offset="27.3%" stop-color="#992db4"/><stop offset="36.4%" stop-color="#615dd6"/><stop offset="45.5%" stop-color="#766bd9"/><stop offset="54.5%" stop-color="#f11074"/><stop offset="63.6%" stop-color="#f92075"/><stop offset="72.7%" stop-color="#fe387e"/><stop offset="81.8%" stop-color="#ea339a"/><stop offset="90.9%" stop-color="#f28fc8"/><stop offset="100.0%" stop-color="#eea2d2"/><stop offset="100%" stop-color="#eea2d2"/></linearGradient><linearGradient id="sg15" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#fca6c1"/><stop offset="9.1%" stop-color="#f2b8e0"/><stop offset="18.2%" stop-color="#f775b3"/><stop offset="27.3%" stop-color="#f61a70"/><stop offset="36.4%" stop-color="#da2495"/><stop offset="45.5%" stop-color="#ea2a86"/><stop offset="54.5%" stop-color="#e20f7f"/><stop offset="63.6%" stop-color="#9241c1"/><stop offset="72.7%" stop-color="#1a78ee"/><stop offset="81.8%" stop-color="#0f8df9"/><stop offset="90.9%" stop-color="#1d98fb"/><stop offset="100.0%" stop-color="#5fb5fc"/><stop offset="100%" stop-color="#5fb5fc"/></linearGradient><linearGradient id="sg16" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#ffbcd2"/><stop offset="9.1%" stop-color="#ff3f7c"/><stop offset="18.2%" stop-color="#59a8f6"/><stop offset="27.3%" stop-color="#ea349b"/><stop offset="36.4%" stop-color="#297eec"/><stop offset="45.5%" stop-color="#4b6ae2"/><stop offset="54.5%" stop-color="#3778e7"/><stop offset="63.6%" stop-color="#4594ef"/><stop offset="72.7%" stop-color="#0a8ffb"/><stop offset="81.8%" stop-color="#1a96fb"/><stop offset="90.9%" stop-color="#32a2fc"/><stop offset="100.0%" stop-color="#b9dcf8"/><stop offset="100%" stop-color="#b9dcf8"/></linearGradient><linearGradient id="sg17" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#bce0fe"/><stop offset="9.1%" stop-color="#229afb"/><stop offset="18.2%" stop-color="#39a5fc"/><stop offset="27.3%" stop-color="#038cfb"/><stop offset="36.4%" stop-color="#0b90fb"/><stop offset="45.5%" stop-color="#4cadfc"/><stop offset="54.5%" stop-color="#b9d5ec"/><stop offset="63.6%" stop-color="#ff1f66"/><stop offset="72.7%" stop-color="#ff2369"/><stop offset="81.8%" stop-color="#ff155f"/><stop offset="90.9%" stop-color="#ff3273"/><stop offset="100.0%" stop-color="#ff4f87"/><stop offset="100%" stop-color="#ff4f87"/></linearGradient><linearGradient id="sg18" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#c4e4fe"/><stop offset="9.1%" stop-color="#36a3fc"/><stop offset="18.2%" stop-color="#31a1fc"/><stop offset="27.3%" stop-color="#1293fb"/><stop offset="36.4%" stop-color="#299af4"/><stop offset="45.5%" stop-color="#cce8fe"/><stop offset="54.5%" stop-color="#ff1f66"/><stop offset="63.6%" stop-color="#ff3575"/><stop offset="72.7%" stop-color="#ff3273"/><stop offset="81.8%" stop-color="#ff1e65"/><stop offset="90.9%" stop-color="#ff3877"/><stop offset="100.0%" stop-color="#fe6c9a"/><stop offset="100%" stop-color="#fe6c9a"/></linearGradient><linearGradient id="sg19" x1="0" x2="1" y1="0" y2="0"><stop offset="0.0%" stop-color="#7ec4fc"/><stop offset="9.1%" stop-color="#8fccfd"/><stop offset="18.2%" stop-color="#1d98fb"/><stop offset="27.3%" stop-color="#158ff9"/><stop offset="36.4%" stop-color="#7689e2"/><stop offset="45.5%" stop-color="#584cce"/><stop offset="54.5%" stop-color="#8068cc"/><stop offset="63.6%" stop-color="#fb68a5"/><stop offset="72.7%" stop-color="#0e91fb"/><stop offset="81.8%" stop-color="#39a5fc"/><stop offset="90.9%" stop-color="#3fa8fc"/><stop offset="100.0%" stop-color="#acd8fa"/><stop offset="100%" stop-color="#acd8fa"/></linearGradient><linearGradient id="swleg" x1="0" x2="1"><stop offset="0%" stop-color="#008bfb"/><stop offset="50%" stop-color="#a24bd6"/><stop offset="100%" stop-color="#ff0051"/></linearGradient></defs>
+                    <line class="sw-grid" x1="381.9" y1="24" x2="381.9" y2="585"/>
+                    <text class="sw-tick" x="381.9" y="602" text-anchor="middle">-2</text>
+                    <line class="sw-grid" x1="459.2" y1="24" x2="459.2" y2="585"/>
+                    <text class="sw-tick" x="459.2" y="602" text-anchor="middle">-1</text>
+                    <line class="sw-zero" x1="536.5" y1="24" x2="536.5" y2="585"/>
+                    <text class="sw-tick" x="536.5" y="602" text-anchor="middle">0</text>
+                    <line class="sw-grid" x1="613.8" y1="24" x2="613.8" y2="585"/>
+                    <text class="sw-tick" x="613.8" y="602" text-anchor="middle">1</text>
+                    <line class="sw-grid" x1="691.1" y1="24" x2="691.1" y2="585"/>
+                    <text class="sw-tick" x="691.1" y="602" text-anchor="middle">2</text>
+                    <line class="sw-grid" x1="768.4" y1="24" x2="768.4" y2="585"/>
+                    <text class="sw-tick" x="768.4" y="602" text-anchor="middle">3</text>
+                    <polygon class="sw-v" fill="url(#sg0)" points="339,43.0 345,42.9 351,42.2 357,40.7 363,41.1 369,41.2 375,41.1 382,39.7 388,38.6 394,36.5 400,34.8 406,33.0 412,33.6 418,33.9 424,35.4 430,37.8 437,40.4 443,42.6 449,43.1 455,43.1 461,43.1 467,43.1 473,43.1 479,43.1 485,43.1 491,43.1 498,43.1 504,43.1 510,43.1 516,43.1 522,43.1 528,43.1 534,43.1 540,43.1 546,43.1 553,43.1 559,43.1 565,43.1 571,43.1 577,43.1 583,43.1 589,42.9 595,43.0 601,42.2 607,41.6 614,40.9 620,41.0 626,40.8 632,40.3 638,39.9 644,40.4 650,40.3 656,40.9 662,41.6 669,42.7 675,43.0 675,45.0 669,45.3 662,46.4 656,47.1 650,47.7 644,47.6 638,48.1 632,47.7 626,47.2 620,47.0 614,47.1 607,46.4 601,45.8 595,45.0 589,45.1 583,44.9 577,44.9 571,44.9 565,44.9 559,44.9 553,44.9 546,44.9 540,44.9 534,44.9 528,44.9 522,44.9 516,44.9 510,44.9 504,44.9 498,44.9 491,44.9 485,44.9 479,44.9 473,44.9 467,44.9 461,44.9 455,44.9 449,44.9 443,45.4 437,47.6 430,50.2 424,52.6 418,54.1 412,54.4 406,55.0 400,53.2 394,51.5 388,49.4 382,48.3 375,46.9 369,46.8 363,46.9 357,47.3 351,45.8 345,45.1 339,45.0"/>
+                    <text class="sw-lab" x="296" y="48.0" text-anchor="end">Hypotension</text>
+                    <polygon class="sw-v" fill="url(#sg1)" points="384,69.6 388,70.0 392,70.1 396,70.1 400,69.9 404,68.9 408,68.6 413,69.4 417,69.6 421,69.2 425,68.2 429,68.2 433,68.3 437,68.0 441,68.2 446,68.7 450,68.4 454,67.2 458,65.7 462,65.6 466,64.8 470,62.5 474,60.6 478,60.0 483,61.3 487,63.2 491,64.8 495,66.5 499,67.3 503,67.8 507,68.3 511,69.0 515,70.0 520,70.1 524,70.1 528,70.1 532,70.1 536,70.1 540,70.1 544,70.1 548,70.1 552,70.1 557,70.1 561,70.1 565,69.7 569,68.8 573,67.9 577,68.1 581,69.0 585,69.1 590,68.7 594,67.7 598,67.7 602,67.7 606,68.1 610,68.5 610,73.5 606,73.9 602,74.3 598,74.3 594,74.3 590,73.3 585,72.9 581,73.0 577,73.9 573,74.1 569,73.2 565,72.3 561,71.9 557,71.9 552,71.9 548,71.9 544,71.9 540,71.9 536,71.9 532,71.9 528,71.9 524,71.9 520,71.9 515,72.0 511,73.0 507,73.7 503,74.2 499,74.7 495,75.5 491,77.2 487,78.8 483,80.7 478,82.0 474,81.4 470,79.5 466,77.2 462,76.4 458,76.3 454,74.8 450,73.6 446,73.3 441,73.8 437,74.0 433,73.7 429,73.8 425,73.8 421,72.8 417,72.4 413,72.6 408,73.4 404,73.1 400,72.1 396,71.9 392,71.9 388,72.0 384,72.4"/>
+                    <text class="sw-lab" x="296" y="75.0" text-anchor="end">Hydrocortisone for hypotension</text>
+                    <polygon class="sw-v" fill="url(#sg2)" points="377,96.0 381,95.9 384,96.4 388,97.1 391,97.1 395,97.1 398,97.1 402,97.1 405,97.1 409,97.1 412,96.1 416,95.4 419,95.4 423,95.1 426,93.1 430,89.5 433,87.4 437,87.0 440,89.2 444,90.5 447,91.5 451,91.4 454,92.0 458,92.6 461,94.1 465,94.7 468,94.7 472,94.8 475,96.0 479,97.1 482,97.1 486,97.1 489,97.1 493,97.1 496,97.1 500,97.1 503,97.1 507,97.1 510,97.1 514,97.1 517,97.0 521,96.1 524,95.4 528,95.0 531,94.4 535,91.8 538,89.4 542,87.8 545,87.3 549,88.0 552,88.6 555,90.7 559,91.9 562,92.3 566,93.8 569,95.1 569,100.9 566,102.2 562,103.7 559,104.1 555,105.3 552,107.4 549,108.0 545,108.7 542,108.2 538,106.6 535,104.2 531,101.6 528,101.0 524,100.6 521,99.9 517,99.0 514,98.9 510,98.9 507,98.9 503,98.9 500,98.9 496,98.9 493,98.9 489,98.9 486,98.9 482,98.9 479,98.9 475,100.0 472,101.2 468,101.3 465,101.3 461,101.9 458,103.4 454,104.0 451,104.6 447,104.5 444,105.5 440,106.8 437,109.0 433,108.6 430,106.5 426,102.9 423,100.9 419,100.6 416,100.6 412,99.9 409,98.9 405,98.9 402,98.9 398,98.9 395,98.9 391,98.9 388,98.9 384,99.6 381,100.1 377,100.0"/>
+                    <text class="sw-lab" x="296" y="102.0" text-anchor="end">Mean SpO₂/FiO₂ ratio</text>
+                    <polygon class="sw-v" fill="url(#sg3)" points="474,117.6 481,114.6 487,114.0 493,117.5 500,120.3 506,121.8 512,123.3 518,124.1 525,124.1 531,124.1 537,124.1 543,124.1 550,124.1 556,124.1 562,124.1 568,124.1 575,124.1 581,124.1 587,124.1 593,124.1 600,124.1 606,124.1 612,124.1 619,124.1 625,124.1 631,124.1 637,124.1 644,124.1 650,124.1 656,124.1 662,124.1 669,124.1 675,124.1 681,124.1 687,124.1 694,124.1 700,124.1 706,124.1 712,124.1 719,124.1 725,124.1 731,124.1 738,124.1 744,124.1 750,124.1 756,124.1 763,124.1 769,124.1 775,124.1 781,124.1 788,124.1 794,124.1 800,124.1 806,124.1 813,124.1 819,123.6 819,126.4 813,125.9 806,125.9 800,125.9 794,125.9 788,125.9 781,125.9 775,125.9 769,125.9 763,125.9 756,125.9 750,125.9 744,125.9 738,125.9 731,125.9 725,125.9 719,125.9 712,125.9 706,125.9 700,125.9 694,125.9 687,125.9 681,125.9 675,125.9 669,125.9 662,125.9 656,125.9 650,125.9 644,125.9 637,125.9 631,125.9 625,125.9 619,125.9 612,125.9 606,125.9 600,125.9 593,125.9 587,125.9 581,125.9 575,125.9 568,125.9 562,125.9 556,125.9 550,125.9 543,125.9 537,125.9 531,125.9 525,125.9 518,125.9 512,126.7 506,128.2 500,129.7 493,132.5 487,136.0 481,135.4 474,132.4"/>
+                    <text class="sw-lab" x="296" y="129.0" text-anchor="end">Hemodynamically significant PDA</text>
+                    <polygon class="sw-v" fill="url(#sg4)" points="460,150.3 464,150.0 467,149.4 471,148.1 475,146.2 478,144.9 482,144.1 486,143.1 489,141.3 493,141.0 497,142.6 500,145.0 504,147.0 508,148.2 511,148.2 515,147.9 519,147.1 522,147.0 526,147.2 530,147.5 533,148.0 537,148.9 541,149.4 544,150.2 548,150.6 552,151.1 555,151.1 559,151.1 563,150.9 566,150.2 570,149.3 574,149.0 577,148.9 581,149.1 585,149.0 588,149.5 592,149.7 596,150.2 599,149.5 603,149.5 607,150.2 610,150.9 614,151.1 618,150.6 621,150.7 625,151.1 629,151.1 632,151.1 636,151.1 640,151.1 643,151.1 647,151.1 651,150.9 654,150.5 658,150.6 662,150.4 662,153.6 658,153.4 654,153.5 651,153.1 647,152.9 643,152.9 640,152.9 636,152.9 632,152.9 629,152.9 625,152.9 621,153.3 618,153.4 614,152.9 610,153.1 607,153.8 603,154.5 599,154.5 596,153.8 592,154.3 588,154.5 585,155.0 581,154.9 577,155.1 574,155.0 570,154.7 566,153.8 563,153.1 559,152.9 555,152.9 552,152.9 548,153.4 544,153.8 541,154.6 537,155.1 533,156.0 530,156.5 526,156.8 522,157.0 519,156.9 515,156.1 511,155.8 508,155.8 504,157.0 500,159.0 497,161.4 493,163.0 489,162.7 486,160.9 482,159.9 478,159.1 475,157.8 471,155.9 467,154.6 464,154.0 460,153.7"/>
+                    <text class="sw-lab" x="296" y="156.0" text-anchor="end">Ventilatory support (AUC)</text>
+                    <polygon class="sw-v" fill="url(#sg5)" points="455,177.4 457,177.4 460,177.6 462,177.6 464,177.1 467,176.2 469,176.0 471,175.7 474,176.0 476,175.4 478,174.0 481,173.3 483,174.0 486,174.9 488,175.4 490,175.2 493,175.0 495,172.4 497,169.9 500,168.0 502,168.8 504,169.6 507,170.8 509,172.1 512,174.1 514,175.3 516,176.5 519,176.6 521,176.5 523,175.9 526,175.9 528,175.2 530,172.2 533,169.5 535,168.6 537,170.8 540,172.4 542,173.6 545,173.7 547,173.8 549,172.9 552,173.3 554,174.1 556,175.0 559,174.9 561,174.9 563,175.4 566,175.9 568,175.2 571,175.0 573,174.8 575,176.4 578,177.3 580,177.5 582,177.3 585,177.1 585,180.9 582,180.7 580,180.5 578,180.7 575,181.6 573,183.2 571,183.0 568,182.8 566,182.1 563,182.6 561,183.1 559,183.1 556,183.0 554,183.9 552,184.7 549,185.1 547,184.2 545,184.3 542,184.4 540,185.6 537,187.2 535,189.4 533,188.5 530,185.8 528,182.8 526,182.1 523,182.1 521,181.5 519,181.4 516,181.5 514,182.7 512,183.9 509,185.9 507,187.2 504,188.4 502,189.2 500,190.0 497,188.1 495,185.6 493,183.0 490,182.8 488,182.6 486,183.1 483,184.0 481,184.7 478,184.0 476,182.6 474,182.0 471,182.3 469,182.0 467,181.8 464,180.9 462,180.4 460,180.4 457,180.6 455,180.6"/>
+                    <text class="sw-lab" x="296" y="183.0" text-anchor="end">Blood gas pH at 1 hour</text>
+                    <polygon class="sw-v" fill="url(#sg6)" points="455,202.9 457,202.9 459,203.8 460,205.1 462,205.1 464,205.1 466,205.1 468,205.1 469,203.9 471,202.5 473,203.2 475,204.6 477,205.1 479,205.1 480,205.1 482,205.1 484,205.1 486,205.1 488,205.1 489,205.1 491,205.1 493,204.0 495,202.7 497,202.5 499,204.2 500,205.1 502,205.1 504,203.6 506,200.3 508,198.4 509,196.4 511,196.7 513,195.4 515,197.7 517,199.3 519,201.4 520,201.1 522,200.6 524,199.2 526,200.1 528,198.0 529,197.9 531,196.2 533,198.1 535,197.3 537,198.1 539,196.3 540,196.7 542,195.0 544,196.4 546,195.7 548,197.9 550,198.3 551,201.0 553,202.3 555,203.7 555,208.3 553,209.7 551,211.0 550,213.7 548,214.1 546,216.3 544,215.6 542,217.0 540,215.3 539,215.7 537,213.9 535,214.7 533,213.9 531,215.8 529,214.1 528,214.0 526,211.9 524,212.8 522,211.4 520,210.9 519,210.6 517,212.7 515,214.3 513,216.6 511,215.3 509,215.6 508,213.6 506,211.7 504,208.4 502,206.9 500,206.9 499,207.8 497,209.5 495,209.3 493,208.0 491,206.9 489,206.9 488,206.9 486,206.9 484,206.9 482,206.9 480,206.9 479,206.9 477,206.9 475,207.4 473,208.8 471,209.5 469,208.1 468,206.9 466,206.9 464,206.9 462,206.9 460,206.9 459,208.2 457,209.1 455,209.1"/>
+                    <text class="sw-lab" x="296" y="210.0" text-anchor="end">Time to surfactant</text>
+                    <polygon class="sw-v" fill="url(#sg7)" points="473,231.6 474,230.5 476,230.8 477,231.7 479,232.1 480,232.1 482,232.1 483,232.1 485,231.5 486,230.9 488,230.5 489,230.5 490,230.3 492,230.2 493,229.8 495,230.8 496,231.7 498,232.1 499,231.3 501,230.7 502,230.7 503,230.2 505,228.9 506,227.9 508,227.5 509,226.9 511,225.0 512,223.0 514,222.0 515,222.5 517,223.0 518,223.6 519,224.1 521,224.5 522,224.2 524,223.7 525,223.7 527,224.1 528,224.5 530,224.9 531,225.6 532,226.0 534,226.3 535,226.4 537,226.9 538,227.6 540,228.2 541,228.1 543,227.8 544,227.5 546,228.3 547,229.2 548,230.1 550,230.2 551,230.5 553,230.9 553,235.1 551,235.5 550,235.8 548,235.9 547,236.8 546,237.7 544,238.5 543,238.2 541,237.9 540,237.8 538,238.4 537,239.1 535,239.6 534,239.7 532,240.0 531,240.4 530,241.1 528,241.5 527,241.9 525,242.3 524,242.3 522,241.8 521,241.5 519,241.9 518,242.4 517,243.0 515,243.5 514,244.0 512,243.0 511,241.0 509,239.1 508,238.5 506,238.1 505,237.1 503,235.8 502,235.3 501,235.3 499,234.7 498,233.9 496,234.3 495,235.2 493,236.2 492,235.8 490,235.7 489,235.5 488,235.5 486,235.1 485,234.5 483,233.9 482,233.9 480,233.9 479,233.9 477,234.3 476,235.2 474,235.5 473,234.4"/>
+                    <text class="sw-lab" x="296" y="237.0" text-anchor="end">FiO₂ (AUC)</text>
+                    <polygon class="sw-v" fill="url(#sg8)" points="439,258.5 441,258.4 444,258.7 446,259.1 448,259.1 451,259.1 453,259.1 456,259.1 458,258.9 460,258.5 463,258.5 465,259.1 467,259.1 470,259.1 472,259.1 475,259.1 477,258.5 479,258.5 482,259.0 484,259.1 486,258.8 489,258.3 491,257.9 494,257.7 496,257.1 498,256.4 501,255.6 503,254.4 505,254.5 508,255.3 510,256.4 513,256.5 515,256.1 517,254.0 520,250.8 522,250.7 524,251.9 527,252.9 529,249.3 531,249.0 534,251.1 536,254.6 539,255.9 541,255.9 543,256.1 546,255.2 548,254.6 550,254.6 553,255.3 555,256.2 558,256.9 560,257.6 562,257.5 565,257.5 567,257.9 569,258.4 569,261.6 567,262.1 565,262.5 562,262.5 560,262.4 558,263.1 555,263.8 553,264.7 550,265.4 548,265.4 546,264.8 543,263.9 541,264.1 539,264.1 536,265.4 534,268.9 531,271.0 529,270.7 527,267.1 524,268.1 522,269.3 520,269.2 517,266.0 515,263.9 513,263.5 510,263.6 508,264.7 505,265.5 503,265.6 501,264.4 498,263.6 496,262.9 494,262.3 491,262.1 489,261.7 486,261.2 484,260.9 482,261.0 479,261.5 477,261.5 475,260.9 472,260.9 470,260.9 467,260.9 465,260.9 463,261.5 460,261.5 458,261.1 456,260.9 453,260.9 451,260.9 448,260.9 446,260.9 444,261.3 441,261.6 439,261.5"/>
+                    <text class="sw-lab" x="296" y="264.0" text-anchor="end">Time with SpO₂ &lt; 90%</text>
+                    <polygon class="sw-v" fill="url(#sg9)" points="382,285.4 385,285.9 388,286.1 391,286.1 395,285.9 398,285.9 401,286.1 405,286.1 408,286.1 411,286.1 414,285.9 418,285.9 421,286.1 424,286.1 427,286.1 431,286.1 434,286.1 437,286.1 440,286.1 444,286.1 447,286.1 450,286.1 454,286.1 457,286.1 460,286.1 463,286.1 467,286.1 470,286.0 473,285.1 476,284.6 480,284.5 483,285.0 486,285.2 490,285.3 493,284.7 496,284.3 499,284.0 503,284.3 506,283.6 509,283.1 512,282.2 516,282.7 519,283.5 522,284.4 526,282.5 529,279.9 532,276.0 535,276.9 539,278.8 542,282.4 545,283.0 548,283.6 552,284.0 555,284.8 558,285.2 561,285.5 561,288.5 558,288.8 555,289.2 552,290.0 548,290.4 545,291.0 542,291.6 539,295.2 535,297.1 532,298.0 529,294.1 526,291.5 522,289.6 519,290.5 516,291.3 512,291.8 509,290.9 506,290.4 503,289.7 499,290.0 496,289.7 493,289.3 490,288.7 486,288.8 483,289.0 480,289.5 476,289.4 473,288.9 470,288.0 467,287.9 463,287.9 460,287.9 457,287.9 454,287.9 450,287.9 447,287.9 444,287.9 440,287.9 437,287.9 434,287.9 431,287.9 427,287.9 424,287.9 421,287.9 418,288.1 414,288.1 411,287.9 408,287.9 405,287.9 401,287.9 398,288.1 395,288.1 391,287.9 388,287.9 385,288.1 382,288.6"/>
+                    <text class="sw-lab" x="296" y="291.0" text-anchor="end">Base excess</text>
+                    <polygon class="sw-v" fill="url(#sg10)" points="513,312.1 514,311.8 514,311.4 515,310.9 516,310.6 517,309.9 517,309.0 518,308.1 519,307.8 519,307.8 520,307.5 521,306.8 522,305.8 522,304.8 523,304.0 524,303.6 525,303.4 525,303.3 526,303.1 527,303.0 527,303.3 528,303.7 529,304.6 530,305.6 530,307.8 531,309.7 532,311.2 532,311.4 533,311.4 534,311.4 535,311.4 535,311.2 536,310.9 537,310.5 538,310.0 538,309.6 539,309.2 540,308.7 540,308.4 541,308.6 542,308.9 543,309.6 543,310.0 544,310.5 545,310.6 546,310.8 546,310.8 547,310.6 548,310.5 548,310.5 549,310.5 550,310.5 551,310.5 551,310.5 552,310.8 553,311.1 553,316.9 552,317.2 551,317.5 551,317.5 550,317.5 549,317.5 548,317.5 548,317.5 547,317.4 546,317.2 546,317.2 545,317.4 544,317.5 543,318.0 543,318.4 542,319.1 541,319.4 540,319.6 540,319.3 539,318.8 538,318.4 538,318.0 537,317.5 536,317.1 535,316.8 535,316.6 534,316.6 533,316.6 532,316.6 532,316.8 531,318.3 530,320.2 530,322.4 529,323.4 528,324.3 527,324.7 527,325.0 526,324.9 525,324.7 525,324.6 524,324.4 523,324.0 522,323.2 522,322.2 521,321.2 520,320.5 519,320.2 519,320.2 518,319.9 517,319.0 517,318.1 516,317.4 515,317.1 514,316.6 514,316.2 513,315.9"/>
+                    <text class="sw-lab" x="296" y="318.0" text-anchor="end">Gestational age</text>
+                    <polygon class="sw-v" fill="url(#sg11)" points="502,338.9 504,338.6 505,338.1 507,337.1 509,336.5 510,336.0 512,335.8 514,335.8 515,335.8 517,335.0 519,331.5 520,330.0 522,331.4 523,335.0 525,336.2 527,336.0 528,334.8 530,332.4 532,331.3 533,330.5 535,331.5 537,330.0 538,330.1 540,330.1 542,331.8 543,333.2 545,335.2 547,336.7 548,337.2 550,337.5 551,338.2 553,339.6 555,340.1 556,340.1 558,339.6 560,338.8 561,339.1 563,340.0 565,340.1 566,340.1 568,340.1 570,340.1 571,340.1 573,340.1 575,340.1 576,340.1 578,340.1 579,340.1 581,340.1 583,340.1 584,340.1 586,340.1 588,340.0 589,339.1 591,338.8 593,339.2 593,342.8 591,343.2 589,342.9 588,342.0 586,341.9 584,341.9 583,341.9 581,341.9 579,341.9 578,341.9 576,341.9 575,341.9 573,341.9 571,341.9 570,341.9 568,341.9 566,341.9 565,341.9 563,342.0 561,342.9 560,343.2 558,342.4 556,341.9 555,341.9 553,342.4 551,343.8 550,344.5 548,344.8 547,345.3 545,346.8 543,348.8 542,350.2 540,351.9 538,351.9 537,352.0 535,350.5 533,351.5 532,350.7 530,349.6 528,347.2 527,346.0 525,345.8 523,347.0 522,350.6 520,352.0 519,350.5 517,347.0 515,346.2 514,346.2 512,346.2 510,346.0 509,345.5 507,344.9 505,343.9 504,343.4 502,343.1"/>
+                    <text class="sw-lab" x="296" y="345.0" text-anchor="end">Birth length z-score</text>
+                    <polygon class="sw-v" fill="url(#sg12)" points="461,366.1 463,366.4 465,366.2 467,366.3 469,366.5 472,367.1 474,367.1 476,367.1 478,366.5 480,366.4 483,367.1 485,367.1 487,367.1 489,367.1 491,367.1 494,367.1 496,366.5 498,365.5 500,365.0 502,365.0 504,364.9 507,364.9 509,365.4 511,365.5 513,365.1 515,364.6 518,364.5 520,364.5 522,364.4 524,363.7 526,362.9 529,361.4 531,359.8 533,357.8 535,357.0 537,358.7 539,361.8 542,363.4 544,362.4 546,361.4 548,361.8 550,363.2 553,364.3 555,364.8 557,365.6 559,366.7 561,367.1 564,367.1 566,367.1 568,367.1 570,367.1 572,367.1 575,367.1 577,366.8 579,366.4 581,366.4 581,369.6 579,369.6 577,369.2 575,368.9 572,368.9 570,368.9 568,368.9 566,368.9 564,368.9 561,368.9 559,369.3 557,370.4 555,371.2 553,371.7 550,372.8 548,374.2 546,374.6 544,373.6 542,372.6 539,374.2 537,377.3 535,379.0 533,378.2 531,376.2 529,374.6 526,373.1 524,372.3 522,371.6 520,371.5 518,371.5 515,371.4 513,370.9 511,370.5 509,370.6 507,371.1 504,371.1 502,371.0 500,371.0 498,370.5 496,369.5 494,368.9 491,368.9 489,368.9 487,368.9 485,368.9 483,368.9 480,369.6 478,369.5 476,368.9 474,368.9 472,368.9 469,369.5 467,369.7 465,369.8 463,369.6 461,369.9"/>
+                    <text class="sw-lab" x="296" y="372.0" text-anchor="end">Birth weight z-score</text>
+                    <polygon class="sw-v" fill="url(#sg13)" points="507,393.8 508,393.6 509,392.6 510,392.5 511,392.4 511,393.1 512,393.0 513,392.4 514,392.3 515,392.1 516,392.5 517,392.4 517,392.6 518,392.0 519,392.1 520,391.9 521,392.3 522,391.7 523,389.6 523,389.3 524,389.4 525,390.9 526,391.0 527,389.9 528,385.8 529,384.4 529,384.0 530,386.9 531,387.4 532,388.3 533,389.7 534,390.8 535,391.6 535,391.7 536,392.0 537,391.3 538,391.0 539,390.6 540,391.3 541,391.4 541,390.7 542,391.0 543,391.3 544,392.3 545,392.4 546,392.3 547,391.5 547,391.7 548,392.2 549,393.4 550,393.4 551,392.3 552,392.3 553,392.4 553,393.7 554,393.9 554,396.1 553,396.3 553,397.6 552,397.7 551,397.7 550,396.6 549,396.6 548,397.8 547,398.3 547,398.5 546,397.7 545,397.6 544,397.7 543,398.7 542,399.0 541,399.3 541,398.6 540,398.7 539,399.4 538,399.0 537,398.7 536,398.0 535,398.3 535,398.4 534,399.2 533,400.3 532,401.7 531,402.6 530,403.1 529,406.0 529,405.6 528,404.2 527,400.1 526,399.0 525,399.1 524,400.6 523,400.7 523,400.4 522,398.3 521,397.7 520,398.1 519,397.9 518,398.0 517,397.4 517,397.6 516,397.5 515,397.9 514,397.7 513,397.6 512,397.0 511,396.9 511,397.6 510,397.5 509,397.4 508,396.4 507,396.2"/>
+                    <text class="sw-lab" x="296" y="399.0" text-anchor="end">Maximum CRP</text>
+                    <polygon class="sw-v" fill="url(#sg14)" points="514,420.8 515,419.7 516,419.2 517,418.9 517,418.7 518,418.8 519,418.8 520,418.7 521,418.4 522,418.2 523,417.7 524,417.3 525,416.7 526,414.2 527,412.8 528,411.6 529,411.0 530,411.4 531,412.2 532,413.8 533,414.7 534,415.3 535,416.5 536,417.1 537,417.9 538,419.0 539,418.9 540,418.4 541,417.6 542,417.3 543,417.0 543,416.9 544,417.1 545,417.5 546,418.1 547,418.3 548,418.3 549,418.1 550,418.0 551,418.1 552,418.8 553,419.2 554,419.4 555,419.5 556,419.3 557,419.2 558,419.0 559,419.1 560,419.2 561,420.0 562,420.1 563,420.1 564,419.5 565,419.5 566,420.0 567,421.0 567,423.0 566,424.0 565,424.5 564,424.5 563,423.9 562,423.9 561,424.0 560,424.8 559,424.9 558,425.0 557,424.8 556,424.7 555,424.5 554,424.6 553,424.8 552,425.2 551,425.9 550,426.0 549,425.9 548,425.7 547,425.7 546,425.9 545,426.5 544,426.9 543,427.1 543,427.0 542,426.7 541,426.4 540,425.6 539,425.1 538,425.0 537,426.1 536,426.9 535,427.5 534,428.7 533,429.3 532,430.2 531,431.8 530,432.6 529,433.0 528,432.4 527,431.2 526,429.8 525,427.3 524,426.7 523,426.3 522,425.8 521,425.6 520,425.3 519,425.2 518,425.2 517,425.3 517,425.1 516,424.8 515,424.3 514,423.2"/>
+                    <text class="sw-lab" x="296" y="426.0" text-anchor="end">Temperature at admission</text>
+                    <polygon class="sw-v" fill="url(#sg15)" points="494,447.5 495,447.2 496,446.5 497,447.4 498,447.7 499,447.7 500,447.4 501,446.6 502,447.4 503,447.1 504,447.6 506,447.2 507,447.0 508,447.0 509,446.4 510,447.0 511,446.1 512,446.2 513,444.8 514,445.3 515,445.6 516,446.1 517,446.3 518,444.8 519,444.5 520,440.9 521,440.8 522,440.3 523,440.5 524,441.0 525,439.8 526,442.4 527,441.9 528,444.4 529,444.9 531,445.3 532,444.7 533,441.8 534,441.3 535,438.5 536,440.1 537,438.0 538,440.5 539,440.8 540,442.0 541,442.4 542,441.9 543,443.9 544,443.4 545,444.9 546,445.4 547,446.4 548,446.8 549,446.4 550,447.1 551,447.3 551,450.7 550,450.9 549,451.6 548,451.2 547,451.6 546,452.6 545,453.1 544,454.6 543,454.1 542,456.1 541,455.6 540,456.0 539,457.2 538,457.5 537,460.0 536,457.9 535,459.5 534,456.7 533,456.2 532,453.3 531,452.7 529,453.1 528,453.6 527,456.1 526,455.6 525,458.2 524,457.0 523,457.5 522,457.7 521,457.2 520,457.1 519,453.5 518,453.2 517,451.7 516,451.9 515,452.4 514,452.7 513,453.2 512,451.8 511,451.9 510,451.0 509,451.6 508,451.0 507,451.0 506,450.8 504,450.4 503,450.9 502,450.6 501,451.4 500,450.6 499,450.3 498,450.3 497,450.6 496,451.5 495,450.8 494,450.5"/>
+                    <text class="sw-lab" x="296" y="453.0" text-anchor="end">Time of peak SpO₂/FiO₂</text>
+                    <polygon class="sw-v" fill="url(#sg16)" points="496,474.5 497,474.1 498,473.3 499,473.2 500,473.2 501,473.5 502,474.7 503,475.1 505,475.1 506,475.1 507,474.7 508,473.5 509,473.0 510,473.0 511,473.1 513,473.9 514,473.4 515,473.8 516,472.5 517,472.0 518,472.0 519,472.0 520,472.6 522,471.0 523,471.6 524,469.8 525,470.7 526,469.0 527,469.5 528,469.9 530,470.5 531,471.6 532,470.5 533,471.7 534,470.8 535,469.8 536,469.2 537,467.3 539,468.1 540,465.0 541,466.6 542,465.3 543,466.9 544,467.6 545,468.2 547,470.2 548,470.1 549,472.3 550,472.1 551,473.3 552,472.8 553,472.7 554,472.6 556,472.8 557,473.9 558,474.4 558,477.6 557,478.1 556,479.2 554,479.4 553,479.3 552,479.2 551,478.7 550,479.9 549,479.7 548,481.9 547,481.8 545,483.8 544,484.4 543,485.1 542,486.7 541,485.4 540,487.0 539,483.9 537,484.7 536,482.8 535,482.2 534,481.2 533,480.3 532,481.5 531,480.4 530,481.5 528,482.1 527,482.5 526,483.0 525,481.3 524,482.2 523,480.4 522,481.0 520,479.4 519,480.0 518,480.0 517,480.0 516,479.5 515,478.2 514,478.6 513,478.1 511,478.9 510,479.0 509,479.0 508,478.5 507,477.3 506,476.9 505,476.9 503,476.9 502,477.3 501,478.5 500,478.8 499,478.8 498,478.7 497,477.9 496,477.5"/>
+                    <text class="sw-lab" x="296" y="480.0" text-anchor="end">Time of peak FiO₂</text>
+                    <polygon class="sw-v" fill="url(#sg17)" points="517,501.8 518,501.3 519,500.8 519,500.6 520,501.4 520,501.4 521,501.4 522,500.6 522,499.7 523,497.4 524,494.9 524,493.2 525,492.9 526,496.2 526,496.5 527,496.6 528,493.4 528,493.2 529,492.8 530,492.3 530,492.0 531,492.0 531,495.7 532,495.9 533,496.6 533,495.5 534,498.2 535,500.8 535,501.8 536,502.1 537,502.1 537,502.1 538,501.7 539,501.3 539,500.2 540,499.9 541,499.5 541,499.2 542,499.1 542,498.8 543,500.1 544,499.6 544,499.2 545,497.1 546,497.0 546,497.1 547,497.9 548,498.9 548,500.0 549,501.3 550,501.4 550,501.4 551,500.6 552,500.6 552,500.9 553,501.2 553,504.8 552,505.1 552,505.4 551,505.4 550,504.6 550,504.6 549,504.7 548,506.0 548,507.1 547,508.1 546,508.9 546,509.0 545,508.9 544,506.8 544,506.4 543,505.9 542,507.2 542,506.9 541,506.8 541,506.5 540,506.1 539,505.8 539,504.7 538,504.3 537,503.9 537,503.9 536,503.9 535,504.2 535,505.2 534,507.8 533,510.5 533,509.4 532,510.1 531,510.3 531,514.0 530,514.0 530,513.7 529,513.2 528,512.8 528,512.6 527,509.4 526,509.5 526,509.8 525,513.1 524,512.8 524,511.1 523,508.6 522,506.3 522,505.4 521,504.6 520,504.6 520,504.6 519,505.4 519,505.2 518,504.7 517,504.2"/>
+                    <text class="sw-lab" x="296" y="507.0" text-anchor="end">Inotropic treatment</text>
+                    <polygon class="sw-v" fill="url(#sg18)" points="521,528.8 522,528.3 522,527.6 523,527.2 524,526.9 525,526.6 525,526.2 526,525.8 527,525.0 527,523.3 528,521.4 529,519.7 530,519.1 530,519.0 531,519.1 532,519.7 532,521.6 533,523.5 534,525.2 535,525.4 535,526.1 536,526.7 537,527.5 538,528.3 538,529.1 539,529.1 540,529.0 540,528.2 541,527.6 542,527.5 543,527.4 543,527.2 544,527.0 545,527.1 546,527.2 546,527.2 547,527.0 548,526.9 548,526.9 549,526.9 550,526.9 551,526.9 551,526.7 552,526.6 553,526.6 554,526.7 554,527.1 555,527.4 556,527.6 556,527.5 557,527.5 558,527.4 559,527.4 559,527.4 560,527.8 561,528.2 561,531.8 560,532.2 559,532.6 559,532.6 558,532.6 557,532.5 556,532.5 556,532.4 555,532.6 554,532.9 554,533.3 553,533.4 552,533.4 551,533.3 551,533.1 550,533.1 549,533.1 548,533.1 548,533.1 547,533.0 546,532.8 546,532.8 545,532.9 544,533.0 543,532.8 543,532.6 542,532.5 541,532.4 540,531.8 540,531.0 539,530.9 538,530.9 538,531.7 537,532.5 536,533.3 535,533.9 535,534.6 534,534.8 533,536.5 532,538.4 532,540.3 531,540.9 530,541.0 530,540.9 529,540.3 528,538.6 527,536.7 527,535.0 526,534.2 525,533.8 525,533.4 524,533.1 523,532.8 522,532.4 522,531.7 521,531.2"/>
+                    <text class="sw-lab" x="296" y="534.0" text-anchor="end">Oligohydramnios</text>
+                    <polygon class="sw-v" fill="url(#sg19)" points="510,555.2 511,555.0 512,554.8 513,555.6 514,556.1 515,556.1 516,556.1 517,555.1 518,554.4 519,554.4 520,554.4 521,553.9 522,552.1 523,552.3 524,552.1 525,550.9 526,549.8 527,546.3 529,547.5 530,546.0 531,549.8 532,550.9 533,552.5 534,552.1 535,550.1 536,550.9 537,550.9 538,551.4 539,551.9 540,551.7 541,553.7 542,554.0 543,555.7 544,556.1 545,556.1 546,556.1 547,556.1 548,555.6 549,553.0 550,552.0 551,551.6 552,552.1 553,552.7 554,552.9 555,554.4 556,554.7 557,555.1 558,555.7 559,556.1 560,556.1 561,556.1 562,555.8 563,555.2 565,555.0 566,555.3 567,555.7 567,558.3 566,558.7 565,559.0 563,558.8 562,558.2 561,557.9 560,557.9 559,557.9 558,558.3 557,558.9 556,559.3 555,559.6 554,561.1 553,561.3 552,561.9 551,562.4 550,562.0 549,561.0 548,558.4 547,557.9 546,557.9 545,557.9 544,557.9 543,558.3 542,560.0 541,560.3 540,562.3 539,562.1 538,562.6 537,563.1 536,563.1 535,563.9 534,561.9 533,561.5 532,563.1 531,564.2 530,568.0 529,566.5 527,567.7 526,564.2 525,563.1 524,561.9 523,561.7 522,561.9 521,560.1 520,559.6 519,559.6 518,559.6 517,558.9 516,557.9 515,557.9 514,557.9 513,558.4 512,559.2 511,559.0 510,558.8"/>
+                    <text class="sw-lab" x="296" y="561.0" text-anchor="end">Time of peak SpO₂</text>
+                    <rect x="320" y="629.0" width="150" height="9" rx="4.5" fill="url(#swleg)"/>
+                    <text class="sw-tick" x="312" y="637.0" text-anchor="end">Feature value</text>
+                    <text class="sw-tick" x="478" y="637.0">low &#8594; high</text>
+                    <text class="sw-tick" x="536.5" y="623" text-anchor="middle">SHAP value (impact on model output)</text>
+                  </svg>
+        </figure>
+        <h3 class="has-text-centered" style="margin-top: 20px;">
+          SHAP value distributions for the twenty most influential features. Each ridge is the spread of one
+          feature&rsquo;s contributions to the model&rsquo;s output, colored from low feature values (blue) to high (red);
+          every row is scaled to its own peak. No individual infant is plotted.
+        </h3>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@inproceedings{shin2026earlyph,
+  title     = {Machine Learning-Based Prediction Model for Early Pulmonary
+               Hypertension in Very Preterm Infants},
+  author    = {Shin, Baek Sup and Heo, Ju Sun and Lee, Yongha and
+               Cho, Sunghwan Steve and Kim, Seh Hyun and Shin, Seung Han and
+               Kim, Ee-Kyung and Do, Jaeyoung and Kim, Han-Suk},
+  booktitle = {Asian Society for Pediatric Research},
+  year      = {2026}
+}</code></pre>
+  </div>
+</section>
+
+<!-- Data availability -->
+<section class="section" style="padding-top: 0;">
+  <div class="container is-max-desktop content">
+    <div class="notification is-light">
+      <p>
+        <b>Data availability.</b> The clinical data underlying this study contain protected health information and
+        cannot be shared publicly. No patient-level data appear on this page &mdash; every figure and statistic shown is
+        an aggregate, group-level summary. Collaboration inquiries may be directed to the contacts listed above and are
+        subject to institutional review board approval and a data use agreement.
+      </p>
+      <p style="margin-bottom:0;">
+        <b>Research use only.</b> The model described here is a retrospective research prototype. It has not been
+        prospectively validated, externally validated, or cleared by any regulatory body, and must not be used to guide
+        the care of any patient.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer (Don't change) -->
+<footer class="footer" style="padding-bottom: 40px;">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is adapted from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>, licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+        <div class="content has-text-centered">
+          <a href="https://en.snu.ac.kr">
+            <img src="./static/images/snu_logo.png" alt="Logo" style="max-height: 48px; margin: 6px 10px;">
+          </a>
+          <a href="https://aidas.snu.ac.kr">
+            <img src="./static/images/aidaslab_logo.png" alt="Logo" style="max-height: 36px; margin: 10px 30px;">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
